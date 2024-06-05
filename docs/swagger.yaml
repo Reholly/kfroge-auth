@@ -1,0 +1,554 @@
+definitions:
+  dto.ApiError:
+    properties:
+      message:
+        type: string
+    type: object
+  dto.Ban:
+    properties:
+      reason:
+        type: string
+      username:
+        type: string
+    type: object
+  dto.Email:
+    properties:
+      value:
+        type: string
+    type: object
+  dto.LogIn:
+    properties:
+      login:
+        type: string
+      password:
+        type: string
+    type: object
+  dto.MainInfo:
+    properties:
+      lastname:
+        type: string
+      name:
+        type: string
+      patronymic:
+        type: string
+    type: object
+  dto.PasswordResetConfirmation:
+    properties:
+      code:
+        type: string
+      password:
+        type: string
+      repeated_password:
+        type: string
+    type: object
+  dto.Profile:
+    properties:
+      email:
+        type: string
+      lastname:
+        type: string
+      name:
+        type: string
+      patronymic:
+        type: string
+      username:
+        type: string
+    type: object
+  dto.Registration:
+    properties:
+      email:
+        type: string
+      lastname:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      patronymic:
+        type: string
+      repeated_password:
+        type: string
+      username:
+        type: string
+    type: object
+  dto.Token:
+    properties:
+      value:
+        type: string
+    type: object
+  dto.TokenPair:
+    properties:
+      access:
+        type: string
+      refresh:
+        type: string
+    type: object
+  dto.Username:
+    properties:
+      username:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: |-
+    sso-service API
+    Это сваггер-документация для сервиса авторизации, аутентификации и управления аккаунтами на платформе KForge
+    Все тела запросов, необходимые токены и возможные ошибки указаны в описании методов.
+paths:
+  /api/auth/account/confirm:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        Эндпоинт для подвтерждения почты по ссылке. Через query параметры получаются
+        code, а затем подтверждается эта почта уже в сервисе.
+      parameters:
+      - in: query
+        name: value
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ApiError'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ApiError'
+        "502":
+          description: Bad Gateway
+          schema:
+            $ref: '#/definitions/dto.ApiError'
+      summary: Подтверждение почты
+      tags:
+      - account
+  /api/auth/account/confirmreset:
+    put:
+      consumes:
+      - application/json
+      description: |-
+        Этот эндпоинт нужен для сброса пароля. Нужен одноразовый код, хранящийся 20 минут, пароль,
+        В теле запроса пользователь должен ввести код, пришедший на почту, новый пароль и повторенный новый пароль.
+      parameters:
+      - description: Reset
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.PasswordResetConfirmation'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ApiError'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ApiError'
+        "502":
+          description: Bad Gateway
+          schema:
+            $ref: '#/definitions/dto.ApiError'
+      summary: Сброс пароля
+      tags:
+      - account
+  /api/auth/account/info:
+    get:
+      consumes:
+      - application/json
+      description: Эндпоинт для получения главной информации аккаунта
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Profile'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ApiError'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ApiError'
+        "502":
+          description: Bad Gateway
+          schema:
+            $ref: '#/definitions/dto.ApiError'
+      security:
+      - Bearer: []
+      summary: Получение профиля
+      tags:
+      - account
+    put:
+      consumes:
+      - application/json
+      description: Эндпоинт для редактирование главной информации аккаунта
+      parameters:
+      - description: Username
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.MainInfo'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ApiError'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ApiError'
+        "502":
+          description: Bad Gateway
+          schema:
+            $ref: '#/definitions/dto.ApiError'
+      security:
+      - Bearer: []
+      summary: Редактирование главной информации
+      tags:
+      - account
+  /api/auth/account/sendresetcode:
+    put:
+      consumes:
+      - application/json
+      description: |-
+        Этот эндпоинт нужен для запроса сброса пароля на почту. Пользователь вводит Email,
+        по этой почте ищется пользователь и генерируется одноразовый код, а затем отправляется на указанную почту.
+      parameters:
+      - description: Email
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.Email'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ApiError'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ApiError'
+        "502":
+          description: Bad Gateway
+          schema:
+            $ref: '#/definitions/dto.ApiError'
+      summary: Запрос на сброс пароля
+      tags:
+      - account
+  /api/auth/admin/ban:
+    put:
+      consumes:
+      - application/json
+      description: |-
+        Этот эндпоинт нужен для бана пользователя по Username с указанием причины бана.
+        По почте пользователю отправляется письмо с причиной бана.
+      parameters:
+      - description: Ban
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.Ban'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ApiError'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ApiError'
+        "502":
+          description: Bad Gateway
+          schema:
+            $ref: '#/definitions/dto.ApiError'
+      security:
+      - Bearer: []
+      summary: Бан аккаунта
+      tags:
+      - admin
+  /api/auth/admin/createmoder:
+    put:
+      consumes:
+      - application/json
+      description: Этот эндпоинт нужен для накидывания роли модератора на пользователя
+        по Username, доступен только пользователям с ролью admin.
+      parameters:
+      - description: Username
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.Username'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ApiError'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ApiError'
+        "502":
+          description: Bad Gateway
+          schema:
+            $ref: '#/definitions/dto.ApiError'
+      security:
+      - Bearer: []
+      summary: Создание модератора
+      tags:
+      - admin
+  /api/auth/admin/deletemoder:
+    put:
+      consumes:
+      - application/json
+      description: Этот эндпоинт нужен для снятия роли модератора с пользователя по
+        Username, доступен только пользователям с ролью admin.
+      parameters:
+      - description: Username
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.Username'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ApiError'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ApiError'
+        "502":
+          description: Bad Gateway
+          schema:
+            $ref: '#/definitions/dto.ApiError'
+      security:
+      - Bearer: []
+      summary: Удаление модератора
+      tags:
+      - admin
+  /api/auth/admin/unban:
+    put:
+      consumes:
+      - application/json
+      description: |-
+        Этот эндпоинт нужен для снятия бана с пользователя по Username.
+        По почте пользователю отправляется сообщение о разбане.
+      parameters:
+      - description: Ban
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.Username'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ApiError'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ApiError'
+        "502":
+          description: Bad Gateway
+          schema:
+            $ref: '#/definitions/dto.ApiError'
+      security:
+      - Bearer: []
+      summary: Разбан
+      tags:
+      - admin
+  /api/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Эндпоинт для входа на KForge. На выходе эндпоинт отдает Access JWT токен (живущий 5 минут) с набором следующих claim:
+        1) role : student / admin / moderator
+        2) exp : время, когда токен перестанет действовать.
+        3) username : имя пользователя. Вообще, нужно для связи с остальными микросервисами.
+        А также refresh токен, живущий 14 дней
+      parameters:
+      - description: LogIn
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LogIn'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.TokenPair'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ApiError'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ApiError'
+      summary: Вход
+      tags:
+      - auth
+  /api/auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Эндпоинт для обновления токенов по refresh токену. Результат состоит
+        из пары новых refresh + access токенов
+      parameters:
+      - description: Refresh
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.Token'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.TokenPair'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ApiError'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ApiError'
+      summary: Обновление токена
+      tags:
+      - auth
+  /api/auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Этот эндпоинт служит для выполнения регистрации новых аккаунтов
+        на KForge.
+      parameters:
+      - description: Register
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.Registration'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ApiError'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ApiError'
+        "502":
+          description: Bad Gateway
+          schema:
+            $ref: '#/definitions/dto.ApiError'
+      summary: Регистрация аккаунта
+      tags:
+      - auth
+securityDefinitions:
+  Bearer:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

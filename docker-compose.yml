@@ -1,0 +1,22 @@
+services:
+  app:
+    build: ./
+    depends_on:
+      - db
+    networks:
+      - default
+    ports:
+      - "8020:8020"
+  db:
+    restart: always
+    image: postgres
+    volumes:
+      - ./.database/postgres/data:/var/lib/postgres/data
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=1234
+      - POSTGRES_DB=sso-service
+    networks:
+      - default
+    ports:
+      - "5436:5432"

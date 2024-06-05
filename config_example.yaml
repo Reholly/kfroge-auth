@@ -1,0 +1,33 @@
+server:
+  rest: ":8020"
+  grpc: ":8030"
+
+cache:
+  code_expiration_time_in_minutes: 5
+  cleanup_interval_in_minutes: 5
+
+database:
+  connection_string: "YOUR_CONN_STR"
+  migration_dir: "./migrator/migrations"
+  driver_name: "postgres"
+
+smtp:
+  smtp_from: "YOUR_MAIL"
+  smtp_password: "YOUR_PASSWORD"
+  smtp_host: "YOUR_HOST"
+  smtp_port: "587"
+
+auth:
+  code_salt: "YOUR_SALT"
+  salt: "YOUR_SALT"
+  email_confirmation_url_base: "YOUR_CONFIRMATION_URL"
+
+jwt:
+  jwt_secret: "JWT_SECRET"
+  access_token_ttl_seconds: 300
+  refresh_token_ttl_hours: 336
+
+seed:
+  default_admin_username: "admin"
+  default_admin_email: "YOUR_EMAIL"
+  default_admin_password: "YOUR_PASSWORD"
